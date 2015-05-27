@@ -12,14 +12,28 @@ from database import session
 @decorators.accept("application/json")
 def posts_get():
     """ Get a list of posts """
-    # Get the query string arguments
+    # Get the query string arguments for title
     title_like = request.args.get("title_like")
+    
+    # Get the query string arguments for body
+    body_like = request.args.get("body_like")
     
     # Get the posts from the database
     posts = session.query(models.Post)
+    
+    # Add filter from 'title_like' and 'body_like' query string
+    if title_like and body_like:
+        posts = posts.filter(models.Post.title.contains(title_like)).\
+                    filter(models.Post.body.contains(body_like))
+    
     # Add filter from 'title_like' query string
     if title_like:
         posts = posts.filter(models.Post.title.contains(title_like))
+    
+    # Add filter from 'body_like' quert string
+    if body_like:
+        posts = posts.filter(models.Post.body.contains(body_like))
+    
     posts = posts.all()
     
     # Convert the posts to JSON and return a response

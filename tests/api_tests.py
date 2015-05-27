@@ -136,7 +136,8 @@ class TestAPI(unittest.TestCase):
     
     def testGetPostsWithTitle(self):
         """ Filtering posts by title """
-        # Add three posts to database, two of which contain the word "whistles"
+        # Add three posts to database
+        # Two of which contain the word "whistles" in title
         postA = models.Post(title="Post with bells", body="Just a test")
         postB = models.Post(title="Post with whistles", body="Still a test")
         postC = models.Post(title="Post with bells and whistles", body="Another test")
@@ -164,6 +165,70 @@ class TestAPI(unittest.TestCase):
         post = posts[1]
         self.assertEqual(post["title"], "Post with bells and whistles")
         self.assertEqual(post["body"], "Another test")
+    
+    def testGetPostsWithBody(self):
+        """ Filtering posts by body """
+        # Add three posts to database
+        # Three of which contain the word "test" in body
+        postA = models.Post(title="Post with bells", body="Just a test")
+        postB = models.Post(title="Post with whistles", body="Still a test")
+        postC = models.Post(title="Post with bells and whistles", body="Another test")
         
+        session.add_all([postA, postB, postC])
+        session.commit()
+        
+        # Make a GET request to the endpoint and adding query string
+        response = self.client.get("/api/posts?body_like=test",
+                                  headers=[("Accept", "application/json")]
+                                  )
+        
+        # Check the response status and mimetype
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.mimetype, "application/json")
+        
+        # Ensure the correct two posts have been returned
+        posts = json.loads(response.data)
+        self.assertEqual(len(posts), 3)
+        
+        post = posts[0]
+        self.assertEqual(post["title"], "Post with bells")
+        self.assertEqual(post["body"], "Just a test")
+        
+        post = posts[1]
+        self.assertEqual(post["title"], "Post with whistles")
+        self.assertEqual(post["body"], "Still a test")
+        
+        post = posts[2]
+        self.assertEqual(post["title"], "Post with bells and whistles")
+        self.assertEqual(post["body"], "Another test")        
+        
+    def testGetPostsWithTitleAndBody(self):
+        """ Filtering posts by title and body"""
+        # Add three posts to database
+        # One of which has "whistles" in title and "Another" in body
+        postA = models.Post(title="Post with bells", body="Just a test")
+        postB = models.Post(title="Post with whistles", body="Still a test")
+        postC = models.Post(title="Post with bells and whistles", body="Another test")
+        
+        session.add_all([postA, postB, postC])
+        session.commit()
+        
+        # Make a GET request to the endpoint and adding query string
+        response = self.client.get("/api/posts?title_like=whistles&body_like=Another",
+                                  headers=[("Accept", "application/json")]
+                                  )
+        
+        # Check the response status and mimetype
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.mimetype, "application/json")
+        
+        # Ensure the correct post is returned
+        posts = json.loads(response.data)
+        self.assertEqual(len(posts), 1)
+        
+        post = posts[0]
+        self.assertEqual(post["title"], "Post with bells and whistles")
+        self.assertEqual(post["body"], "Another test")
+                
 if __name__ == "__main__":
     unittest.main()
