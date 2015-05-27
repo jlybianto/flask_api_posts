@@ -133,6 +133,37 @@ class TestAPI(unittest.TestCase):
         
         post = json.loads(response.data)
         self.assertEqual(post["message"], "Deleted post with id 1 from database")
+    
+    def testGetPostsWithTitle(self):
+        """ Filtering posts by title """
+        # Add three posts to database, two of which contain the word "whistles"
+        postA = models.Post(title="Post with bells", body="Just a test")
+        postB = models.Post(title="Post with whistles", body="Still a test")
+        postC = models.Post(title="Post with bells and whistles", body="Another test")
+        
+        session.add_all([postA, postB, postC])
+        session.commit()
+        
+        # Make a GET request to the endpoint and adding query string
+        response = self.client.get("/api/posts?title_like=whistles",
+                                  headers=[("Accept", "application/json")]
+                                  )
+        
+        # Check the response status and mimetype
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.mimetype, "application/json")
+        
+        # Ensure the correct two posts have been returned
+        posts = json.loads(response.data)
+        self.assertEqual(len(posts), 2)
+        
+        post = posts[0]
+        self.assertEqual(post["title"], "Post with whistles")
+        self.assertEqual(post["body"], "Still a test")
+        
+        post = posts[1]
+        self.assertEqual(post["title"], "Post with bells and whistles")
+        self.assertEqual(post["body"], "Another test")
         
 if __name__ == "__main__":
     unittest.main()
