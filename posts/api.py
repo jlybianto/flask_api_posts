@@ -82,7 +82,7 @@ def post_delete(id):
     return Response(data, 200, mimetype="application/json")
 
 @app.route("/api/posts", methods=["POST"])
-@decorators.accept("application/json")
+@decorators.require("application/json")
 def posts_post():
     """ Add a new post """
     # To access the data passed into the endpoint

@@ -262,5 +262,20 @@ class TestAPI(unittest.TestCase):
         self.assertEqual(post.title, "Example Post")
         self.assertEqual(post.body, "Just a test")
         
+    def testUnsupportedMimetype(self):
+        data = "<xml></xml>"
+        response = self.client.post("/api/posts",
+                                   data=json.dumps(data),
+                                   content_type="application/xml",
+                                   headers=[("Accept", "application/json")]
+                                   )
+        
+        self.assertEqual(response.status_code, 415)
+        self.assertEqual(response.mimetype, "application/json")
+        
+        data = json.loads(response.data)
+        self.assertEqual(data["message"],
+                        "Request must contain application/json data")
+        
 if __name__ == "__main__":
     unittest.main()
