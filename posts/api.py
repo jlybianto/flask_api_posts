@@ -79,4 +79,22 @@ def post_delete(id):
     session.commit()
     message = "Deleted post with id {} from database".format(id)
     data = json.dumps({"message": message})
-    return Response(data, 200, mimetype="application/json")      
+    return Response(data, 200, mimetype="application/json")
+
+@app.route("/api/posts", methods=["POST"])
+@decorators.accept("application/json")
+def posts_post():
+    """ Add a new post """
+    # To access the data passed into the endpoint
+    data = request.json
+    
+    # Add the post to the database
+    post = models.Post(title=data["title"], body=data["body"])
+    session.add(post)
+    session.commit()
+    
+    # Return a 201 Created, containing the post as JSON and with the
+    # Location header set to the location of the post
+    data = json.dumps(post.as_dictionary())
+    headers = {"Location": url_for("post_get", id=post.id)}
+    return Response(data, 201, headers=headers, mimetype="application/json")
