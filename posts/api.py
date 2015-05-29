@@ -104,8 +104,7 @@ def posts_post():
         validate(data, post_schema)
     except ValidationError as error:
         data = {"message": error.message}
-        return Response(json.dumps(data), 422, mimetype="application/json")
-    
+        return Response(json.dumps(data), 422, mimetype="application/json")    
     
     # Add the post to the database
     post = models.Post(title=data["title"], body=data["body"])
@@ -117,3 +116,28 @@ def posts_post():
     data = json.dumps(post.as_dictionary())
     headers = {"Location": url_for("post_get", id=post.id)}
     return Response(data, 201, headers=headers, mimetype="application/json")
+
+@app.route("/api/posts/<int:id>", methods=["PUT"])
+@decorators.accept("application/json")
+@decorators.require("application/json")
+def posts_edit(id):
+    """ Edit a post """
+    # To access the data passed into the endpoint
+    data = request.json
+    
+    # Get the post from the database
+    post = session.query(models.Post).get(id)
+    
+    # Check whether the post exists
+    # If no, return a 404 with a helpful message
+    if not post:
+        message = "Could not find post with id {}".format(id)
+        data = json.dumps({"message": message})
+        return Response(data, 404, mimetype="application/json")
+
+    # If yes, gives ability to edit the post
+    post.title = data["title"]
+    post.body = data["body"]
+    session.add(post)
+    session.commit()
+    return Response(data, 200, mimetype="application/json")
