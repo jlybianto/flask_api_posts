@@ -52,8 +52,7 @@ def posts_get():
 @app.route("/api/posts/<int:id>", methods=["GET"])
 @decorators.accept("application/json")
 def post_get(id):
-    """ Single post endpoint """
-    
+    """ Single post """   
     # Get the post from the database
     post = session.query(models.Post).get(id)
     
@@ -71,8 +70,7 @@ def post_get(id):
 @app.route("/api/posts/<int:id>", methods=["DELETE"])
 @decorators.accept("application/json")
 def post_delete(id):
-    """ Delete single post endpoint """
-    
+    """ Delete single post """    
     # Get the post from the database
     post = session.query(models.Post).get(id)
     
@@ -93,7 +91,7 @@ def post_delete(id):
 @app.route("/api/posts", methods=["POST"])
 @decorators.accept("application/json")
 @decorators.require("application/json")
-def posts_post():
+def post_post():
     """ Add a new post """
     # To access the data passed into the endpoint
     data = request.json
@@ -120,7 +118,7 @@ def posts_post():
 @app.route("/api/posts/<int:id>", methods=["PUT"])
 @decorators.accept("application/json")
 @decorators.require("application/json")
-def posts_edit(id):
+def post_edit(id):
     """ Edit a post """
     # To access the data passed into the endpoint
     data = request.json
